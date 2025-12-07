@@ -1,0 +1,175 @@
+# Mosaic Framework Configuration
+
+expert_system:
+  num_experts: 8
+  total_params_budget: 80_000_000_000
+  
+  expert_architecture:
+    num_layers: 40
+    hidden_dim: 5120
+    num_attention_heads: 32
+    ffn_dim: 20480
+    vocab_size: 50000
+    max_seq_length: 2048
+    dropout: 0.1
+    
+  expert_architecture_small:
+    num_layers: 6
+    hidden_dim: 768
+    num_attention_heads: 12
+    ffn_dim: 3072
+    vocab_size: 50000
+    max_seq_length: 512
+    dropout: 0.1
+
+  complexity_weights:
+    alpha1: 0.4
+    alpha2: 0.3
+    alpha3: 0.3
+
+domain_training:
+  num_epochs: 160
+  
+  loss_weights:
+    alpha: 0.6
+    beta: 0.3
+    gamma: 0.1
+    delta: 0.1
+    
+  distillation:
+    temperature: 2.0
+    lambda1: 0.5
+    lambda2: 0.5
+    
+  optimizer:
+    type: "AdamW"
+    learning_rate: 1.0e-4
+    weight_decay: 0.01
+    betas: [0.9, 0.999]
+    
+  scheduler:
+    type: "cosine"
+    warmup_steps: 1000
+    min_lr: 1.0e-6
+    
+  batch_size: 32
+  gradient_accumulation_steps: 4
+
+ensemble_training:
+  feature_extractor:
+    model_name: "bert-base-uncased"
+    output_dim: 768
+    pooling: "mean"
+    
+  router_network:
+    hidden_dims: [512, 256]
+    activation: "gelu"
+    dropout: 0.1
+    
+  meta_learner:
+    hidden_dims: [256, 128, 64]
+    activation: "relu"
+    dropout: 0.2
+    
+  loss_weights:
+    lambda_balance: 0.1
+    lambda_explore: 0.05
+    lambda_reg: 1.0e-4
+    
+  num_epochs: 50
+  batch_size: 64
+  learning_rate: 1.0e-3
+  top_k_experts: 3
+
+attack_execution:
+  feature_dims:
+    target_model: 12
+    multi_expert: 28
+    interaction: 5
+    total: 45
+    
+  attack_classifier:
+    hidden_dims: [128, 64]
+    activation: "relu"
+    dropout: 0.3
+    
+  training:
+    num_epochs: 50
+    batch_size: 256
+    learning_rate: 1.0e-3
+    weight_decay: 1.0e-4
+    early_stopping_patience: 5
+    
+  dataset:
+    train_ratio: 0.7
+    test_ratio: 0.3
+    num_samples_per_granularity: 20000
+    granularities: ["document", "paragraph", "sentence"]
+    
+  evaluation:
+    fpr_thresholds: [0.001, 0.01, 0.05, 0.1]
+
+target_models:
+  open_source:
+    - name: "gpt2"
+      model_path: "gpt2"
+      type: "huggingface"
+    - name: "gpt2-medium"
+      model_path: "gpt2-medium"
+      type: "huggingface"
+    - name: "gpt-neo-1.3b"
+      model_path: "EleutherAI/gpt-neo-1.3B"
+      type: "huggingface"
+    - name: "opt-1.3b"
+      model_path: "facebook/opt-1.3b"
+      type: "huggingface"
+    - name: "llama2-7b"
+      model_path: "meta-llama/Llama-2-7b-hf"
+      type: "huggingface"
+    - name: "pythia-1.4b"
+      model_path: "EleutherAI/pythia-1.4b"
+      type: "huggingface"
+
+datasets:
+  training:
+    - name: "wikitext"
+      path: "wikitext"
+      subset: "wikitext-103-v1"
+    - name: "pile"
+      path: "EleutherAI/pile"
+      subset: null
+    - name: "ag_news"
+      path: "ag_news"
+      subset: null
+    - name: "imdb"
+      path: "imdb"
+      subset: null
+    - name: "reddit"
+      path: "reddit"
+      subset: null
+      
+  preprocessing:
+    max_length: 512
+    min_length: 32
+    tokenizer: "gpt2"
+
+experiment:
+  seed: 42
+  device: "cuda"
+  num_gpus: 8
+  mixed_precision: true
+  
+  logging:
+    level: "INFO"
+    save_dir: "./logs"
+    tensorboard: true
+    wandb: false
+    
+  checkpoint:
+    save_dir: "./checkpoints"
+    save_every_n_epochs: 10
+    keep_last_n: 3
+    
+  output:
+    results_dir: "./results"
+    figures_dir: "./figures"
