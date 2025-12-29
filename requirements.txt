@@ -1,8 +1,3 @@
-# ==============================================================================
-# AMSM Framework Dependencies
-# Adaptive Multi-Shadow Model Framework for LLM Membership Inference Attack
-# ==============================================================================
-
 # Core Deep Learning
 torch>=2.0.0
 transformers>=4.35.0

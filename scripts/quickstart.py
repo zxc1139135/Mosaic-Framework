@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 """
-AMSM Framework - Quick Start Example
+Mosaic Framework - Quick Start Example
 ====================================
-
-快速入门示例，演示框架的基本用法。
 
 Usage:
     python scripts/quickstart.py
@@ -13,27 +11,26 @@ import os
 import sys
 from pathlib import Path
 
-# 添加项目根目录到路径
+
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 import numpy as np
 import torch
 
-# 设置随机种子
+
 torch.manual_seed(42)
 np.random.seed(42)
 
 print("=" * 60)
-print("AMSM Framework Quick Start Example")
+print("Mosaic Framework Quick Start Example")
 print("=" * 60)
 
-# ==================== 1. 创建专家模型 ====================
 print("\n[Step 1] Creating Expert Models...")
 
 from src.models import ExpertModelSmall, MultiExpertSystem
 
-# 创建单个专家模型
+
 expert = ExpertModelSmall(
     expert_id=0,
     vocab_size=1000,
@@ -43,7 +40,7 @@ expert = ExpertModelSmall(
 )
 print(f"  Single expert parameters: {sum(p.numel() for p in expert.parameters()):,}")
 
-# 创建多专家系统
+
 num_experts = 4
 multi_expert = MultiExpertSystem(
     num_experts=num_experts,
@@ -55,7 +52,7 @@ multi_expert = MultiExpertSystem(
 print(f"  Multi-expert system with {num_experts} experts")
 print(f"  Total parameters: {multi_expert.get_total_params():,}")
 
-# 测试前向传播
+
 batch_size = 2
 seq_length = 32
 input_ids = torch.randint(0, 1000, (batch_size, seq_length))
@@ -63,18 +60,18 @@ input_ids = torch.randint(0, 1000, (batch_size, seq_length))
 output = expert(input_ids)
 print(f"  Expert output shape: {output.shape}")
 
-# ==================== 2. 创建路由网络 ====================
+
 print("\n[Step 2] Creating Router Network...")
 
 from src.models import RouterNetwork, SimpleFeatureExtractor
 
-# 特征提取器
+
 feature_extractor = SimpleFeatureExtractor(
     vocab_size=1000,
     output_dim=256,
 )
 
-# 路由网络
+
 router = RouterNetwork(
     input_dim=256,
     num_experts=num_experts,
@@ -82,14 +79,14 @@ router = RouterNetwork(
     top_k=2,
 )
 
-# 测试路由
+
 features = feature_extractor(input_ids)
 weights, top_k_indices, top_k_weights = router(features)
 print(f"  Feature shape: {features.shape}")
 print(f"  Routing weights shape: {weights.shape}")
 print(f"  Top-K indices: {top_k_indices}")
 
-# ==================== 3. 创建元学习器 ====================
+
 print("\n[Step 3] Creating Meta Learner...")
 
 from src.models import MetaLearner
@@ -99,21 +96,21 @@ meta_learner = MetaLearner(
     hidden_dims=[32, 16],
 )
 
-# 测试预测
+
 meta_features = torch.randn(batch_size, 64)
 predictions = meta_learner.predict_proba(meta_features)
 print(f"  Meta features shape: {meta_features.shape}")
 print(f"  Predictions: {predictions.squeeze().tolist()}")
 
-# ==================== 4. 创建攻击分类器 ====================
+
 print("\n[Step 4] Creating Attack Classifier...")
 
 from src.models import AttackClassifier, AttackFeatureExtractor
 
-# 特征提取器
+
 attack_feature_extractor = AttackFeatureExtractor(num_experts=num_experts)
 
-# 攻击分类器
+
 attack_classifier = AttackClassifier(
     input_dim=45,
     hidden_dims=[64, 32],
@@ -121,18 +118,18 @@ attack_classifier = AttackClassifier(
 
 print(f"  Attack classifier parameters: {sum(p.numel() for p in attack_classifier.parameters()):,}")
 
-# ==================== 5. 评估指标示例 ====================
+
 print("\n[Step 5] Evaluation Metrics Example...")
 
 from src.evaluation import MembershipInferenceEvaluator, BaselineComparator
 
-# 创建模拟数据
+
 n_samples = 500
 y_true = np.random.randint(0, 2, n_samples)
 y_scores_good = y_true * 0.7 + np.random.rand(n_samples) * 0.3
 y_scores_bad = np.random.rand(n_samples)
 
-# 评估
+
 evaluator = MembershipInferenceEvaluator()
 metrics = evaluator.evaluate(y_true, y_scores_good)
 
@@ -141,19 +138,19 @@ print(f"  Accuracy: {metrics.accuracy:.4f}")
 print(f"  Attack Advantage: {metrics.attack_advantage:.4f}")
 print(f"  TPR@1%FPR: {metrics.tpr_at_fpr.get(0.01, 0):.4f}")
 
-# 基线对比
+
 print("\n  Baseline Comparison:")
 comparator = BaselineComparator()
 comparator.add_result("AMSM", y_true, y_scores_good)
 comparator.add_result("Random", y_true, y_scores_bad)
 comparator.print_comparison_table()
 
-# ==================== 6. 领域聚类示例 ====================
+
 print("\n[Step 6] Domain Clustering Example...")
 
 from src.data import DomainComplexityAnalyzer, DomainClusterer
 
-# 复杂度分析
+
 analyzer = DomainComplexityAnalyzer()
 texts = [
     "This is a simple sentence.",
@@ -166,26 +163,24 @@ for text in texts:
     complexity = analyzer.compute_complexity(text)
     print(f"    '{text[:30]}...' -> {complexity:.4f}")
 
-# 聚类
+
 embeddings = np.random.randn(100, 64)
 clusterer = DomainClusterer(num_clusters=4)
 labels = clusterer.fit(embeddings)
 print(f"\n  Clustered 100 samples into 4 domains")
 print(f"  Cluster sizes: {[sum(labels == i) for i in range(4)]}")
 
-# ==================== 7. 简单训练循环示例 ====================
+
 print("\n[Step 7] Simple Training Loop Example...")
 
 from src.training import AttackTrainingConfig, AttackTrainer
 
-# 准备数据
+
 features = np.random.randn(200, 45).astype(np.float32)
 labels = np.random.randint(0, 2, 200).astype(np.float32)
 
-# 使特征与标签有一定相关性
 features[:, 0] = labels * 2 - 1 + np.random.randn(200) * 0.5
 
-# 配置
 config = AttackTrainingConfig(
     num_epochs=5,
     batch_size=32,
@@ -193,7 +188,6 @@ config = AttackTrainingConfig(
     device="cpu",
 )
 
-# 训练
 classifier = AttackClassifier(input_dim=45, hidden_dims=[32, 16])
 trainer = AttackTrainer(classifier, config)
 
@@ -202,27 +196,8 @@ history = trainer.train(features, labels)
 
 print(f"  Final Test Accuracy: {history['test_accuracy']:.4f}")
 
-# ==================== 8. 完整流程概述 ====================
 print("\n[Step 8] Full Pipeline Overview...")
-print("""
-  完整的AMSM攻击流程:
-  
-  1. Phase I:  构建K*=8个专家模型
-  2. Phase II: 对每个专家进行领域专业化训练
-     - 领域聚类
-     - 多教师知识蒸馏
-     - 多样性促进
-  3. Phase III: 训练集成机制
-     - 路由网络学习专家选择
-     - 元学习器融合专家输出
-  4. Phase IV: 执行攻击
-     - 提取45维攻击特征
-     - 训练攻击分类器
-     - 评估攻击性能
-  
-  运行完整流程:
-  $ python scripts/train.py --config configs/config.yaml
-""")
+print("""python scripts/train.py --config configs/config.yaml""")
 
 print("=" * 60)
 print("Quick Start Complete!")

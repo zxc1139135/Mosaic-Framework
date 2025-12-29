@@ -1,15 +1,6 @@
 """
 Utility Functions Module
 ========================
-
-通用工具函数模块。
-
-包含:
-    - 配置加载
-    - 日志设置
-    - 设备管理
-    - 种子设置
-    - 可视化
 """
 
 import os
@@ -26,47 +17,20 @@ import numpy as np
 import torch
 
 
-# ==================== 配置管理 ====================
 
 def load_config(config_path: str) -> Dict[str, Any]:
-    """
-    加载YAML配置文件
-    
-    Args:
-        config_path: 配置文件路径
-        
-    Returns:
-        config: 配置字典
-    """
     with open(config_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
     return config
 
 
 def save_config(config: Dict[str, Any], save_path: str):
-    """
-    保存配置到YAML文件
-    
-    Args:
-        config: 配置字典
-        save_path: 保存路径
-    """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, 'w', encoding='utf-8') as f:
         yaml.dump(config, f, default_flow_style=False)
 
 
 def merge_configs(base_config: Dict, override_config: Dict) -> Dict:
-    """
-    合并两个配置字典
-    
-    Args:
-        base_config: 基础配置
-        override_config: 覆盖配置
-        
-    Returns:
-        merged: 合并后的配置
-    """
     merged = base_config.copy()
     
     for key, value in override_config.items():
@@ -78,31 +42,16 @@ def merge_configs(base_config: Dict, override_config: Dict) -> Dict:
     return merged
 
 
-# ==================== 日志设置 ====================
-
 def setup_logging(
     log_dir: Optional[str] = None,
     log_level: str = "INFO",
     log_file: Optional[str] = None,
 ) -> logging.Logger:
-    """
-    设置日志
-    
-    Args:
-        log_dir: 日志目录
-        log_level: 日志级别
-        log_file: 日志文件名
-        
-    Returns:
-        logger: 日志器
-    """
     logger = logging.getLogger("AMSM")
     logger.setLevel(getattr(logging, log_level.upper()))
-    
-    # 清除已有的handler
+
     logger.handlers.clear()
-    
-    # 控制台handler
+
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_format = logging.Formatter(
@@ -111,8 +60,7 @@ def setup_logging(
     )
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
-    
-    # 文件handler
+
     if log_dir is not None:
         os.makedirs(log_dir, exist_ok=True)
         
@@ -135,19 +83,11 @@ def setup_logging(
 
 
 def get_logger(name: str = "AMSM") -> logging.Logger:
-    """获取日志器"""
     return logging.getLogger(name)
 
 
-# ==================== 随机种子 ====================
 
 def set_seed(seed: int = 42):
-    """
-    设置随机种子
-    
-    Args:
-        seed: 随机种子
-    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -159,18 +99,8 @@ def set_seed(seed: int = 42):
         torch.backends.cudnn.benchmark = False
 
 
-# ==================== 设备管理 ====================
 
 def get_device(device: Optional[str] = None) -> torch.device:
-    """
-    获取计算设备
-    
-    Args:
-        device: 设备名称 (None时自动选择)
-        
-    Returns:
-        device: torch设备
-    """
     if device is None:
         if torch.cuda.is_available():
             device = "cuda"
@@ -181,14 +111,12 @@ def get_device(device: Optional[str] = None) -> torch.device:
 
 
 def get_num_gpus() -> int:
-    """获取可用GPU数量"""
     if torch.cuda.is_available():
         return torch.cuda.device_count()
     return 0
 
 
 def get_gpu_memory_info() -> List[Dict[str, int]]:
-    """获取GPU内存信息"""
     info = []
     
     if torch.cuda.is_available():
@@ -210,7 +138,6 @@ def get_gpu_memory_info() -> List[Dict[str, int]]:
 
 
 def print_gpu_info():
-    """打印GPU信息"""
     if not torch.cuda.is_available():
         print("No GPU available")
         return
@@ -224,26 +151,21 @@ def print_gpu_info():
         print(f"  Free: {info['free_memory'] / 1024**3:.2f} GB")
 
 
-# ==================== 模型工具 ====================
 
 def count_parameters(model: torch.nn.Module) -> int:
-    """统计模型参数数量"""
     return sum(p.numel() for p in model.parameters())
 
 
 def count_trainable_parameters(model: torch.nn.Module) -> int:
-    """统计可训练参数数量"""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def model_summary(model: torch.nn.Module, input_size: Optional[tuple] = None):
-    """打印模型摘要"""
     print(f"Model: {model.__class__.__name__}")
     print(f"Total Parameters: {count_parameters(model):,}")
     print(f"Trainable Parameters: {count_trainable_parameters(model):,}")
     print(f"Non-trainable Parameters: {count_parameters(model) - count_trainable_parameters(model):,}")
-    
-    # 打印层结构
+
     print("\nLayer Structure:")
     for name, module in model.named_children():
         num_params = sum(p.numel() for p in module.parameters())
@@ -257,16 +179,6 @@ def save_model(
     epoch: Optional[int] = None,
     additional_info: Optional[Dict] = None,
 ):
-    """
-    保存模型
-    
-    Args:
-        model: 模型
-        save_path: 保存路径
-        optimizer: 优化器
-        epoch: 当前epoch
-        additional_info: 额外信息
-    """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     
     checkpoint = {
@@ -291,18 +203,6 @@ def load_model(
     optimizer: Optional[torch.optim.Optimizer] = None,
     device: Optional[torch.device] = None,
 ) -> Dict:
-    """
-    加载模型
-    
-    Args:
-        model: 模型
-        load_path: 加载路径
-        optimizer: 优化器
-        device: 设备
-        
-    Returns:
-        checkpoint: 检查点字典
-    """
     if device is None:
         device = get_device()
         
@@ -316,36 +216,27 @@ def load_model(
     return checkpoint
 
 
-# ==================== 文件工具 ====================
 
 def ensure_dir(path: str):
-    """确保目录存在"""
     Path(path).mkdir(parents=True, exist_ok=True)
 
 
 def save_json(data: Dict, path: str):
-    """保存JSON文件"""
     ensure_dir(os.path.dirname(path))
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
 def load_json(path: str) -> Dict:
-    """加载JSON文件"""
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
 def get_timestamp() -> str:
-    """获取时间戳字符串"""
     return datetime.now().strftime('%Y%m%d_%H%M%S')
 
 
-# ==================== 训练工具 ====================
-
 class AverageMeter:
-    """平均值计算器"""
-    
     def __init__(self, name: str = ""):
         self.name = name
         self.reset()
@@ -367,8 +258,6 @@ class AverageMeter:
 
 
 class Timer:
-    """计时器"""
-    
     def __init__(self):
         self.start_time = None
         self.elapsed = 0
@@ -393,21 +282,11 @@ class Timer:
         return f"{self.elapsed:.2f}s"
 
 
-# ==================== 可视化工具 ====================
-
 def plot_training_curves(
     history: Dict[str, List[float]],
     save_path: Optional[str] = None,
     title: str = "Training Curves",
 ):
-    """
-    绘制训练曲线
-    
-    Args:
-        history: 训练历史 {metric_name: [values]}
-        save_path: 保存路径
-        title: 图表标题
-    """
     try:
         import matplotlib.pyplot as plt
     except ImportError:
@@ -444,15 +323,6 @@ def plot_roc_curve(
     save_path: Optional[str] = None,
     label: str = "Model",
 ):
-    """
-    绘制ROC曲线
-    
-    Args:
-        y_true: 真实标签
-        y_scores: 预测分数
-        save_path: 保存路径
-        label: 图例标签
-    """
     try:
         import matplotlib.pyplot as plt
         from sklearn.metrics import roc_curve, auc
@@ -483,33 +353,27 @@ def plot_roc_curve(
 
 
 if __name__ == "__main__":
-    # 测试代码
     print("Testing Utility Functions...")
-    
-    # 测试种子设置
+
     print("\nTesting set_seed...")
     set_seed(42)
     print(f"Random int: {random.randint(0, 100)}")
-    
-    # 测试设备获取
+
     print("\nTesting device functions...")
     device = get_device()
     print(f"Device: {device}")
     print(f"Number of GPUs: {get_num_gpus()}")
-    
-    # 测试日志
+
     print("\nTesting logging...")
     logger = setup_logging(log_level="INFO")
     logger.info("Test log message")
-    
-    # 测试计时器
+
     print("\nTesting Timer...")
     import time
     with Timer() as timer:
         time.sleep(0.1)
     print(f"Elapsed time: {timer}")
-    
-    # 测试平均值计算器
+
     print("\nTesting AverageMeter...")
     meter = AverageMeter("loss")
     for i in range(5):

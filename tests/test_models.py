@@ -1,10 +1,6 @@
 """
-AMSM Framework - Unit Tests
+Mosaic Framework - Unit Tests
 ===========================
-
-测试框架核心组件的功能正确性。
-
-运行测试:
     pytest tests/test_models.py -v
     pytest tests/ -v --cov=src
 """
@@ -13,7 +9,6 @@ import sys
 import os
 from pathlib import Path
 
-# 添加项目根目录
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -23,13 +18,9 @@ import torch
 import torch.nn as nn
 
 
-# ==================== 模型测试 ====================
-
 class TestExpertModel:
-    """测试专家模型"""
     
     def test_expert_model_small_creation(self):
-        """测试小型专家模型创建"""
         from src.models import ExpertModelSmall
         
         model = ExpertModelSmall(
@@ -43,7 +34,6 @@ class TestExpertModel:
         assert model.expert_id == 0
         
     def test_expert_model_forward(self):
-        """测试专家模型前向传播"""
         from src.models import ExpertModelSmall
         
         model = ExpertModelSmall(
@@ -62,7 +52,6 @@ class TestExpertModel:
         assert output.shape == (batch_size, seq_length, 1000)
         
     def test_multi_expert_system(self):
-        """测试多专家系统"""
         from src.models import MultiExpertSystem
         
         system = MultiExpertSystem(
@@ -77,7 +66,6 @@ class TestExpertModel:
         assert system.get_total_params() > 0
         
     def test_multi_expert_forward_all(self):
-        """测试所有专家前向传播"""
         from src.models import MultiExpertSystem
         
         system = MultiExpertSystem(
@@ -100,10 +88,7 @@ class TestExpertModel:
 
 
 class TestRouterNetwork:
-    """测试路由网络"""
-    
     def test_router_creation(self):
-        """测试路由网络创建"""
         from src.models import RouterNetwork
         
         router = RouterNetwork(
@@ -116,7 +101,6 @@ class TestRouterNetwork:
         assert router is not None
         
     def test_router_forward(self):
-        """测试路由网络前向传播"""
         from src.models import RouterNetwork
         
         router = RouterNetwork(
@@ -134,12 +118,10 @@ class TestRouterNetwork:
         assert weights.shape == (batch_size, 8)
         assert top_k_indices.shape == (batch_size, 3)
         assert top_k_weights.shape == (batch_size, 3)
-        
-        # 权重应该归一化
+
         assert torch.allclose(weights.sum(dim=-1), torch.ones(batch_size), atol=1e-5)
         
     def test_simple_feature_extractor(self):
-        """测试简化特征提取器"""
         from src.models import SimpleFeatureExtractor
         
         extractor = SimpleFeatureExtractor(
@@ -157,10 +139,7 @@ class TestRouterNetwork:
 
 
 class TestMetaLearner:
-    """测试元学习器"""
-    
     def test_meta_learner_creation(self):
-        """测试元学习器创建"""
         from src.models import MetaLearner
         
         learner = MetaLearner(
@@ -172,7 +151,6 @@ class TestMetaLearner:
         assert learner is not None
         
     def test_meta_learner_forward(self):
-        """测试元学习器前向传播"""
         from src.models import MetaLearner
         
         learner = MetaLearner(
@@ -189,7 +167,6 @@ class TestMetaLearner:
         assert output.shape == (batch_size, 1)
         
     def test_meta_learner_predict(self):
-        """测试元学习器预测"""
         from src.models import MetaLearner
         
         learner = MetaLearner(
@@ -211,10 +188,7 @@ class TestMetaLearner:
 
 
 class TestAttackClassifier:
-    """测试攻击分类器"""
-    
     def test_attack_classifier_creation(self):
-        """测试攻击分类器创建"""
         from src.models import AttackClassifier
         
         classifier = AttackClassifier(
@@ -226,7 +200,6 @@ class TestAttackClassifier:
         assert classifier is not None
         
     def test_attack_classifier_forward(self):
-        """测试攻击分类器前向传播"""
         from src.models import AttackClassifier
         
         classifier = AttackClassifier(
@@ -242,13 +215,8 @@ class TestAttackClassifier:
         assert output.shape == (batch_size, 1)
 
 
-# ==================== 数据测试 ====================
-
 class TestDataLoader:
-    """测试数据加载"""
-    
     def test_text_dataset(self):
-        """测试文本数据集"""
         from src.data import TextDataset
         
         texts = ["Hello world", "Test text", "Another sample"]
@@ -261,7 +229,6 @@ class TestDataLoader:
         assert sample["input_ids"].shape[0] <= 32
         
     def test_membership_dataset(self):
-        """测试成员数据集"""
         from src.data import MembershipDataset
         
         member_texts = ["Member text 1", "Member text 2"]
@@ -277,7 +244,6 @@ class TestDataLoader:
         assert dataset.get_member_ratio() == 0.5
         
     def test_data_loader_factory(self):
-        """测试数据加载器工厂"""
         from src.data import DataConfig, DataLoaderFactory
         
         config = DataConfig(batch_size=2, max_length=32)
@@ -292,10 +258,7 @@ class TestDataLoader:
 
 
 class TestDomainClustering:
-    """测试领域聚类"""
-    
     def test_complexity_analyzer(self):
-        """测试复杂度分析器"""
         from src.data import DomainComplexityAnalyzer
         
         analyzer = DomainComplexityAnalyzer()
@@ -310,7 +273,6 @@ class TestDomainClustering:
         assert 0 <= complexity <= 1
         
     def test_domain_clusterer(self):
-        """测试领域聚类器"""
         from src.data import DomainClusterer, SimpleEmbeddingExtractor
         
         extractor = SimpleEmbeddingExtractor(max_features=100)
@@ -330,13 +292,9 @@ class TestDomainClustering:
         assert set(labels).issubset({0, 1})
 
 
-# ==================== 训练测试 ====================
-
 class TestTraining:
-    """测试训练模块"""
     
     def test_distillation_loss(self):
-        """测试蒸馏损失"""
         from src.training import DistillationLoss
         
         loss_fn = DistillationLoss(temperature=2.0)
@@ -349,11 +307,10 @@ class TestTraining:
         
         loss = loss_fn(student_logits, teacher_logits)
         
-        assert loss.dim() == 0  # 标量
+        assert loss.dim() == 0
         assert loss.item() >= 0
         
     def test_router_loss(self):
-        """测试路由损失"""
         from src.training import RouterLoss
         
         loss_fn = RouterLoss(num_experts=8)
@@ -368,41 +325,31 @@ class TestTraining:
         assert "balance_loss" in loss_dict
         
     def test_early_stopping(self):
-        """测试早停机制"""
         from src.training import EarlyStopping
         
         early_stopping = EarlyStopping(patience=3)
-        
-        # 模拟损失下降
+
         assert not early_stopping(1.0)
         assert not early_stopping(0.9)
         assert not early_stopping(0.8)
-        
-        # 模拟损失不再下降
+
         assert not early_stopping(0.85)
         assert not early_stopping(0.85)
-        assert early_stopping(0.85)  # 第3次，触发早停
+        assert early_stopping(0.85)
 
-
-# ==================== 评估测试 ====================
 
 class TestEvaluation:
-    """测试评估模块"""
-    
     def test_evaluator_creation(self):
-        """测试评估器创建"""
         from src.evaluation import MembershipInferenceEvaluator
         
         evaluator = MembershipInferenceEvaluator()
         assert evaluator is not None
         
     def test_auc_computation(self):
-        """测试AUC计算"""
         from src.evaluation import MembershipInferenceEvaluator
         
         evaluator = MembershipInferenceEvaluator()
-        
-        # 完美预测
+
         y_true = np.array([0, 0, 1, 1])
         y_scores = np.array([0.1, 0.2, 0.8, 0.9])
         
@@ -411,7 +358,6 @@ class TestEvaluation:
         assert auc == 1.0
         
     def test_full_evaluation(self):
-        """测试完整评估"""
         from src.evaluation import MembershipInferenceEvaluator
         
         evaluator = MembershipInferenceEvaluator()
@@ -428,7 +374,6 @@ class TestEvaluation:
         assert 0 <= metrics.auc_roc <= 1
         
     def test_baseline_comparator(self):
-        """测试基线对比器"""
         from src.evaluation import BaselineComparator
         
         comparator = BaselineComparator()
@@ -447,13 +392,9 @@ class TestEvaluation:
         assert comparison["Method A"]["auc_roc"] > comparison["Method B"]["auc_roc"]
 
 
-# ==================== 工具测试 ====================
-
 class TestUtils:
-    """测试工具函数"""
     
     def test_set_seed(self):
-        """测试随机种子设置"""
         from src.utils import set_seed
         
         set_seed(42)
@@ -465,7 +406,6 @@ class TestUtils:
         assert torch.equal(a, b)
         
     def test_average_meter(self):
-        """测试平均值计算器"""
         from src.utils import AverageMeter
         
         meter = AverageMeter("test")
@@ -478,7 +418,6 @@ class TestUtils:
         assert meter.count == 3
         
     def test_timer(self):
-        """测试计时器"""
         from src.utils import Timer
         import time
         
@@ -490,7 +429,6 @@ class TestUtils:
         assert elapsed >= 0.1
         
     def test_count_parameters(self):
-        """测试参数计数"""
         from src.utils import count_parameters
         
         model = nn.Linear(10, 5)
@@ -500,37 +438,28 @@ class TestUtils:
         assert params == 55
 
 
-# ==================== 集成测试 ====================
-
 class TestIntegration:
-    """集成测试"""
-    
     def test_full_pipeline_small(self):
-        """测试小规模完整流程"""
         from src.models import ExpertModelSmall, RouterNetwork, MetaLearner, AttackClassifier
         from src.data import DataConfig, DataLoaderFactory
         from src.evaluation import MembershipInferenceEvaluator
-        
-        # 创建模型
+
         expert = ExpertModelSmall(expert_id=0, vocab_size=100, hidden_dim=64, num_layers=1)
         router = RouterNetwork(input_dim=64, num_experts=2, hidden_dims=[32], top_k=1)
         meta_learner = MetaLearner(input_dim=32, hidden_dims=[16])
         classifier = AttackClassifier(input_dim=10, hidden_dims=[8])
-        
-        # 创建数据
+
         texts = ["Sample text " + str(i) for i in range(10)]
         config = DataConfig(batch_size=2, max_length=16)
         factory = DataLoaderFactory(config)
         dataloader = factory.create_text_dataloader(texts)
-        
-        # 前向传播测试
+
         batch = next(iter(dataloader))
         input_ids = batch["input_ids"]
         
         expert_output = expert(input_ids)
         assert expert_output.shape[0] == 2
-        
-        # 评估测试
+
         evaluator = MembershipInferenceEvaluator()
         y_true = np.array([0, 1, 0, 1])
         y_scores = np.array([0.2, 0.8, 0.3, 0.7])
@@ -539,8 +468,5 @@ class TestIntegration:
         assert metrics.auc_roc > 0.5
 
 
-# ==================== 运行测试 ====================
-
 if __name__ == "__main__":
-    # 运行所有测试
     pytest.main([__file__, "-v", "--tb=short"])

@@ -1,158 +1,137 @@
 # ==============================================================================
-# AMSM Framework Configuration
-# Adaptive Multi-Shadow Model Framework for LLM Membership Inference Attack
+# Mosaic Framework Configuration
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# Phase I: Expert System Configuration (专家体系构建配置)
+# Phase I: Expert System Configuration
 # ------------------------------------------------------------------------------
 expert_system:
-  # 最优专家数量 K* = 8 (基于论文理论推导)
+  # K* = 8
   num_experts: 8
   
-  # 总参数预算 (80B参数，实际实现中会缩小)
+  # 0B
   total_params_budget: 80_000_000_000
   
-  # 专家模型架构参数 (Decoder-only Transformer)
+  # Decoder-only Transformer
   expert_architecture:
-    num_layers: 40          # 40层深度
-    hidden_dim: 5120        # 隐藏维度5120
-    num_attention_heads: 32 # 注意力头数32
-    ffn_dim: 20480          # 前馈网络维度20480
-    vocab_size: 50000       # 词汇表大小50000
-    max_seq_length: 2048    # 最大序列长度
-    dropout: 0.1
-    
-  # 缩小版专家模型 (用于实际实验)
-  expert_architecture_small:
-    num_layers: 6           # 6层深度
-    hidden_dim: 768         # 隐藏维度768
-    num_attention_heads: 12 # 注意力头数12
-    ffn_dim: 3072           # 前馈网络维度3072
-    vocab_size: 50000       # 词汇表大小50000
-    max_seq_length: 512     # 最大序列长度
+    num_layers: 40
+    hidden_dim: 5120
+    num_attention_heads: 32
+    ffn_dim: 20480
+    vocab_size: 50000
+    max_seq_length: 2048    #
     dropout: 0.1
 
-  # 领域复杂度评估权重
+  expert_architecture_small:
+    num_layers: 6
+    hidden_dim: 768
+    num_attention_heads: 12
+    ffn_dim: 3072
+    vocab_size: 50000
+    max_seq_length: 512
+    dropout: 0.1
+
   complexity_weights:
-    alpha1: 0.4  # 词汇多样性权重
-    alpha2: 0.3  # 句法复杂度权重
-    alpha3: 0.3  # 语义熵权重
+    alpha1: 0.4
+    alpha2: 0.3
+    alpha3: 0.3
 
 # ------------------------------------------------------------------------------
-# Phase II: Domain Specialization Training (领域专业化训练配置)
+# Phase II: Domain Specialization Training
 # ------------------------------------------------------------------------------
 domain_training:
-  # 训练轮数
   num_epochs: 160
-  
-  # 损失函数权重 (论文公式3)
+
   loss_weights:
-    alpha: 0.6  # 领域专业化损失权重
-    beta: 0.3   # 目标模型蒸馏损失权重
-    gamma: 0.1  # 交叉专家蒸馏损失权重
-    delta: 0.1  # 多样性促进损失权重
-    
-  # 蒸馏参数
+    alpha: 0.6
+    beta: 0.3
+    gamma: 0.1
+    delta: 0.1
+
   distillation:
     temperature: 2.0
-    lambda1: 0.5  # 均值对齐权重
-    lambda2: 0.5  # 方差对齐权重
-    
-  # 优化器配置
+    lambda1: 0.5
+    lambda2: 0.5
+
   optimizer:
     type: "AdamW"
     learning_rate: 1.0e-4
     weight_decay: 0.01
     betas: [0.9, 0.999]
-    
-  # 学习率调度
+
   scheduler:
     type: "cosine"
     warmup_steps: 1000
     min_lr: 1.0e-6
-    
-  # 批次大小
+
   batch_size: 32
   gradient_accumulation_steps: 4
 
 # ------------------------------------------------------------------------------
-# Phase III: Ensemble Mechanism Training (集成机制训练配置)
+# Phase III: Ensemble Mechanism Training
 # ------------------------------------------------------------------------------
 ensemble_training:
-  # 特征提取器配置
   feature_extractor:
     model_name: "bert-base-uncased"
     output_dim: 768
     pooling: "mean"
-    
-  # 路由网络配置
+
   router_network:
     hidden_dims: [512, 256]
     activation: "gelu"
     dropout: 0.1
-    
-  # 元学习器配置
+
   meta_learner:
     hidden_dims: [256, 128, 64]
     activation: "relu"
     dropout: 0.2
-    
-  # 损失权重
+
   loss_weights:
-    lambda_balance: 0.1   # 负载均衡损失
-    lambda_explore: 0.05  # 探索损失
-    lambda_reg: 1.0e-4    # 正则化
-    
-  # 训练配置
+    lambda_balance: 0.1
+    lambda_explore: 0.05
+    lambda_reg: 1.0e-4
+
   num_epochs: 50
   batch_size: 64
   learning_rate: 1.0e-3
-  
-  # Top-K稀疏激活
+
   top_k_experts: 3
 
 # ------------------------------------------------------------------------------
-# Phase IV: Attack Execution (攻击执行配置)
+# Phase IV: Attack Execution
 # ------------------------------------------------------------------------------
 attack_execution:
-  # 特征维度配置 (论文5.2节)
   feature_dims:
-    target_model: 12      # 目标模型特征维度
-    multi_expert: 28      # 多专家系统特征维度
-    interaction: 5        # 交互特征维度
-    total: 45             # 总特征维度
-    
-  # 攻击分类器配置 (三层MLP)
+    target_model: 12
+    multi_expert: 28
+    interaction: 5
+    total: 45
+
   attack_classifier:
     hidden_dims: [128, 64]
     activation: "relu"
     dropout: 0.3
-    
-  # 训练配置
+
   training:
     num_epochs: 50
     batch_size: 256
     learning_rate: 1.0e-3
     weight_decay: 1.0e-4
     early_stopping_patience: 5
-    
-  # 数据集配置
+
   dataset:
     train_ratio: 0.7
     test_ratio: 0.3
     num_samples_per_granularity: 20000
     granularities: ["document", "paragraph", "sentence"]
-    
-  # 评估阈值
+
   evaluation:
     fpr_thresholds: [0.001, 0.01, 0.05, 0.1]
 
 # ------------------------------------------------------------------------------
-# Target Models Configuration (目标模型配置)
+# Target Models Configuration
 # ------------------------------------------------------------------------------
 target_models:
-  # 开源模型
   open_source:
     - name: "llama2-7b"
       model_path: "meta-llama/Llama-2-7b-hf"
@@ -172,8 +151,7 @@ target_models:
     - name: "pythia-6.9b"
       model_path: "EleutherAI/pythia-6.9b"
       type: "huggingface"
-      
-  # 商业API模型
+
   commercial:
     - name: "gpt-4"
       api_endpoint: "https://api.openai.com/v1/chat/completions"
@@ -186,10 +164,9 @@ target_models:
       type: "anthropic"
 
 # ------------------------------------------------------------------------------
-# Datasets Configuration (数据集配置)
+# Datasets Configuration
 # ------------------------------------------------------------------------------
 datasets:
-  # 训练数据集
   training:
     - name: "pile"
       path: "EleutherAI/pile"
@@ -203,8 +180,7 @@ datasets:
     - name: "arxiv"
       path: "scientific_papers"
       subset: "arxiv"
-      
-  # 攻击评估数据集
+
   evaluation:
     - name: "wikitext"
       path: "wikitext"
@@ -212,56 +188,50 @@ datasets:
     - name: "bookcorpus"
       path: "bookcorpus"
       subset: null
-      
-  # 数据预处理
+
   preprocessing:
     max_length: 512
     min_length: 32
     tokenizer: "gpt2"
 
 # ------------------------------------------------------------------------------
-# Experiment Configuration (实验配置)
+# Experiment Configuration
 # ------------------------------------------------------------------------------
 experiment:
-  # 随机种子
   seed: 42
-  
-  # 设备配置
+
   device: "cuda"
   num_gpus: 8
   mixed_precision: true
-  
-  # 日志配置
+
   logging:
     level: "INFO"
     save_dir: "./logs"
     tensorboard: true
     wandb: false
-    
-  # 检查点配置
+
   checkpoint:
     save_dir: "./checkpoints"
     save_every_n_epochs: 10
     keep_last_n: 3
-    
-  # 输出配置
+
   output:
     results_dir: "./results"
     figures_dir: "./figures"
 
 # ------------------------------------------------------------------------------
-# Baseline Methods (基线方法配置)
+# Baseline Methods
 # ------------------------------------------------------------------------------
 baselines:
   - name: "loss_based"
-    description: "基于损失的成员推理攻击"
+    description: "loss_based"
   - name: "likelihood_ratio"
-    description: "似然比攻击"
+    description: "likelihood_ratio"
   - name: "reference_model"
-    description: "参考模型攻击"
+    description: "reference_model"
   - name: "neighborhood"
-    description: "邻域攻击"
+    description: "neighborhood"
   - name: "min_k"
-    description: "Min-K%攻击"
+    description: "min_k"
   - name: "single_shadow"
-    description: "单影子模型攻击"
+    description: "single_shadow"

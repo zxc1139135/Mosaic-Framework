@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 """
-AMSM Framework - Structure Validator
+Mosaic Framework - Structure Validator
 ====================================
-
-验证项目结构和文件完整性。
-此脚本不需要安装任何依赖即可运行。
-
 Usage:
     python scripts/validate_structure.py
 """
@@ -14,10 +10,8 @@ import os
 import sys
 from pathlib import Path
 
-# 项目根目录
 PROJECT_ROOT = Path(__file__).parent.parent
 
-# 预期的项目结构
 EXPECTED_STRUCTURE = {
     "configs": ["config.yaml"],
     "src": ["__init__.py"],
@@ -58,7 +52,6 @@ EXPECTED_STRUCTURE = {
     ],
 }
 
-# 预期的关键类和函数
 EXPECTED_CONTENTS = {
     "src/models/expert_model.py": [
         "class ExpertModel",
@@ -113,12 +106,10 @@ EXPECTED_CONTENTS = {
 
 
 def check_file_exists(file_path: Path) -> bool:
-    """检查文件是否存在"""
     return file_path.exists()
 
 
 def check_file_contains(file_path: Path, patterns: list) -> dict:
-    """检查文件是否包含预期内容"""
     results = {}
     
     if not file_path.exists():
@@ -133,14 +124,12 @@ def check_file_contains(file_path: Path, patterns: list) -> dict:
 
 
 def validate_structure():
-    """验证项目结构"""
     print("=" * 60)
-    print("AMSM Framework - Structure Validation")
+    print("Mosaic Framework - Structure Validation")
     print("=" * 60)
     
     all_passed = True
-    
-    # 检查目录和文件
+
     print("\n1. Checking Directory Structure...")
     print("-" * 40)
     
@@ -160,8 +149,7 @@ def validate_structure():
             else:
                 print(f"   [MISSING] {directory}/{file_name}")
                 all_passed = False
-                
-    # 检查文件内容
+
     print("\n2. Checking File Contents...")
     print("-" * 40)
     
@@ -182,8 +170,7 @@ def validate_structure():
             for pattern in missing:
                 print(f"       - Missing: {pattern}")
             all_passed = False
-            
-    # 检查配置文件
+
     print("\n3. Checking Configuration...")
     print("-" * 40)
     
@@ -206,8 +193,7 @@ def validate_structure():
     else:
         print("   [MISSING] config.yaml")
         all_passed = False
-        
-    # 检查requirements.txt
+
     print("\n4. Checking Requirements...")
     print("-" * 40)
     
@@ -225,11 +211,9 @@ def validate_structure():
     else:
         print("   [MISSING] requirements.txt")
         all_passed = False
-        
-    # 统计
+
     print("\n" + "=" * 60)
-    
-    # 统计文件数量和大小
+
     total_files = 0
     total_lines = 0
     total_size = 0
@@ -248,8 +232,7 @@ def validate_structure():
     print(f"   Total files: {total_files}")
     print(f"   Total lines: {total_lines:,}")
     print(f"   Total size: {total_size / 1024:.1f} KB")
-    
-    # 结果
+
     print("\n" + "=" * 60)
     if all_passed:
         print("✓ All validation checks PASSED!")

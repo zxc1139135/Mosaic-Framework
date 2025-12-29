@@ -2,13 +2,11 @@
 Training Module
 ===============
 
-四阶段训练模块，实现AMSM框架的完整训练流程。
-
 Stages:
-    - Phase I: Expert System Construction (专家体系构建)
-    - Phase II: Domain Specialization Training (领域专业化训练)
-    - Phase III: Ensemble Mechanism Training (集成机制训练)
-    - Phase IV: Attack Execution (攻击执行)
+    - Phase I: Expert System Construction
+    - Phase II: Domain Specialization Training
+    - Phase III: Ensemble Mechanism Training
+    - Phase IV: Attack Execution
 """
 
 from .expert_trainer import (

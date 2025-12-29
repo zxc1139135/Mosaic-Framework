@@ -1,12 +1,9 @@
 """
 Data Module
 ===========
-
-数据加载、预处理和领域聚类模块。
-
 Components:
-    - DataLoader: 数据加载器
-    - DomainClustering: 领域聚类和专家分配
+    - DataLoader
+    - DomainClustering
 """
 
 from .data_loader import (

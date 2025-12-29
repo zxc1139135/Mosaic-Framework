@@ -2,13 +2,11 @@
 Models Module
 =============
 
-神经网络模型定义模块，包含AMSM框架的所有核心网络组件。
-
 Components:
-    - ExpertModel: 专家模型 (Decoder-only Transformer)
-    - RouterNetwork: 动态路由选择网络
-    - MetaLearner: 元学习决策器
-    - AttackClassifier: 成员推理攻击分类器
+    - ExpertModel
+    - RouterNetwork
+    - MetaLearner
+    - AttackClassifier
 """
 
 from .expert_model import (

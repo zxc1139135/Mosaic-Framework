@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 """
-AMSM Framework - Comprehensive Tests
+Mosaic Framework - Comprehensive Tests
 =====================================
-
-框架各模块的综合测试。
-
 Usage:
     python tests/test_all.py
     python tests/test_all.py --module models
@@ -16,7 +13,6 @@ import argparse
 import unittest
 from pathlib import Path
 
-# 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -26,17 +22,14 @@ import torch.nn as nn
 
 
 class TestExpertModels(unittest.TestCase):
-    """专家模型测试"""
     
     def setUp(self):
-        """设置测试环境"""
         self.batch_size = 4
         self.seq_length = 64
         self.vocab_size = 1000
         self.hidden_dim = 256
         
     def test_expert_model_small_forward(self):
-        """测试小型专家模型前向传播"""
         from src.models import ExpertModelSmall
         
         model = ExpertModelSmall(
@@ -52,7 +45,6 @@ class TestExpertModels(unittest.TestCase):
         self.assertEqual(output.shape, (self.batch_size, self.seq_length, self.vocab_size))
         
     def test_expert_model_small_loss(self):
-        """测试专家模型损失计算"""
         from src.models import ExpertModelSmall
         
         model = ExpertModelSmall(
@@ -71,7 +63,6 @@ class TestExpertModels(unittest.TestCase):
         self.assertGreater(loss.item(), 0)
         
     def test_multi_expert_system(self):
-        """测试多专家系统"""
         from src.models import MultiExpertSystem
         
         num_experts = 4
@@ -84,27 +75,22 @@ class TestExpertModels(unittest.TestCase):
         )
         
         input_ids = torch.randint(0, self.vocab_size, (self.batch_size, self.seq_length))
-        
-        # 测试单个专家
+
         output = system.forward(input_ids, expert_id=0)
         self.assertEqual(output.shape, (self.batch_size, self.seq_length, self.vocab_size))
-        
-        # 测试所有专家
+
         all_outputs = system.forward_all_experts(input_ids)
         self.assertEqual(len(all_outputs), num_experts)
 
 
 class TestRouterNetwork(unittest.TestCase):
-    """路由网络测试"""
     
     def setUp(self):
-        """设置测试环境"""
         self.batch_size = 8
         self.input_dim = 768
         self.num_experts = 8
         
     def test_router_forward(self):
-        """测试路由网络前向传播"""
         from src.models import RouterNetwork
         
         router = RouterNetwork(
@@ -120,13 +106,11 @@ class TestRouterNetwork(unittest.TestCase):
         self.assertEqual(weights.shape, (self.batch_size, self.num_experts))
         self.assertEqual(top_k_indices.shape, (self.batch_size, 3))
         self.assertEqual(top_k_weights.shape, (self.batch_size, 3))
-        
-        # 验证权重和为1
+
         weight_sums = weights.sum(dim=-1)
         self.assertTrue(torch.allclose(weight_sums, torch.ones(self.batch_size), atol=1e-5))
         
     def test_router_balance_loss(self):
-        """测试负载均衡损失"""
         from src.models import RouterNetwork
         
         router = RouterNetwork(
@@ -142,15 +126,12 @@ class TestRouterNetwork(unittest.TestCase):
 
 
 class TestMetaLearner(unittest.TestCase):
-    """元学习器测试"""
     
     def setUp(self):
-        """设置测试环境"""
         self.batch_size = 16
         self.input_dim = 128
         
     def test_meta_learner_forward(self):
-        """测试元学习器前向传播"""
         from src.models import MetaLearner
         
         meta_learner = MetaLearner(
@@ -164,7 +145,6 @@ class TestMetaLearner(unittest.TestCase):
         self.assertEqual(output.shape, (self.batch_size, 1))
         
     def test_meta_learner_predict(self):
-        """测试元学习器预测"""
         from src.models import MetaLearner
         
         meta_learner = MetaLearner(
@@ -182,15 +162,11 @@ class TestMetaLearner(unittest.TestCase):
 
 
 class TestAttackClassifier(unittest.TestCase):
-    """攻击分类器测试"""
-    
     def setUp(self):
-        """设置测试环境"""
         self.batch_size = 32
         self.feature_dim = 45
         
     def test_attack_classifier_forward(self):
-        """测试攻击分类器前向传播"""
         from src.models import AttackClassifier
         
         classifier = AttackClassifier(
@@ -204,7 +180,6 @@ class TestAttackClassifier(unittest.TestCase):
         self.assertEqual(output.shape, (self.batch_size, 1))
         
     def test_attack_feature_extractor(self):
-        """测试攻击特征提取器"""
         from src.models import AttackFeatureExtractor
         
         extractor = AttackFeatureExtractor(num_experts=8)
@@ -230,19 +205,15 @@ class TestAttackClassifier(unittest.TestCase):
 
 
 class TestDataLoading(unittest.TestCase):
-    """数据加载测试"""
-    
     def test_text_dataset(self):
-        """测试文本数据集"""
         from src.data import TextDataset
         from transformers import AutoTokenizer
         
         texts = ["Hello world", "This is a test", "Machine learning"]
-        
-        # 使用简单的tokenizer模拟
+
         class SimpleTokenizer:
             def __call__(self, text, max_length=512, truncation=True, padding="max_length", return_tensors="pt"):
-                # 简单的字符级tokenization
+                # tokenization
                 ids = [ord(c) % 1000 for c in text[:max_length]]
                 ids = ids + [0] * (max_length - len(ids))
                 return {
@@ -259,7 +230,6 @@ class TestDataLoading(unittest.TestCase):
         self.assertIn("input_ids", item)
         
     def test_membership_dataset(self):
-        """测试成员数据集"""
         from src.data import MembershipDataset
         
         member_texts = ["member 1", "member 2"]
@@ -278,17 +248,14 @@ class TestDataLoading(unittest.TestCase):
         dataset = MembershipDataset(member_texts, non_member_texts, tokenizer, max_length=32)
         
         self.assertEqual(len(dataset), 4)
-        
-        # 检查标签
+
         labels = [dataset[i]["label"] for i in range(len(dataset))]
         self.assertEqual(sum(labels), 2)  # 2个成员
 
 
 class TestDomainClustering(unittest.TestCase):
-    """领域聚类测试"""
     
     def test_complexity_analyzer(self):
-        """测试领域复杂度分析器"""
         from src.data import DomainComplexityAnalyzer
         
         analyzer = DomainComplexityAnalyzer()
@@ -301,10 +268,8 @@ class TestDomainClustering(unittest.TestCase):
         self.assertLessEqual(complexity, 1)
         
     def test_domain_clusterer(self):
-        """测试领域聚类器"""
         from src.data import DomainClusterer
-        
-        # 创建简单的嵌入
+
         embeddings = np.random.randn(100, 128)
         
         clusterer = DomainClusterer(num_clusters=4)
@@ -315,10 +280,8 @@ class TestDomainClustering(unittest.TestCase):
 
 
 class TestTraining(unittest.TestCase):
-    """训练模块测试"""
     
     def test_distillation_loss(self):
-        """测试蒸馏损失"""
         from src.training import DistillationLoss
         
         loss_fn = DistillationLoss(temperature=2.0)
@@ -336,45 +299,38 @@ class TestTraining(unittest.TestCase):
         self.assertGreater(loss.item(), 0)
         
     def test_early_stopping(self):
-        """测试早停机制"""
         from src.training import EarlyStopping
         
         early_stopping = EarlyStopping(patience=3)
-        
-        # 模拟损失下降
+
         self.assertFalse(early_stopping(1.0))
         self.assertFalse(early_stopping(0.9))
         self.assertFalse(early_stopping(0.8))
-        
-        # 模拟损失停滞
+
         self.assertFalse(early_stopping(0.85))
         self.assertFalse(early_stopping(0.85))
-        self.assertTrue(early_stopping(0.85))  # 第3次停滞触发早停
+        self.assertTrue(early_stopping(0.85))
 
 
 class TestEvaluation(unittest.TestCase):
-    """评估模块测试"""
     
     def setUp(self):
-        """设置测试数据"""
         np.random.seed(42)
         self.n_samples = 100
         self.y_true = np.random.randint(0, 2, self.n_samples)
         self.y_scores = self.y_true * 0.7 + np.random.rand(self.n_samples) * 0.3
         
     def test_evaluator_metrics(self):
-        """测试评估指标计算"""
         from src.evaluation import MembershipInferenceEvaluator
         
         evaluator = MembershipInferenceEvaluator()
         metrics = evaluator.evaluate(self.y_true, self.y_scores)
         
-        self.assertGreater(metrics.auc_roc, 0.5)  # 应该好于随机
+        self.assertGreater(metrics.auc_roc, 0.5)
         self.assertGreater(metrics.accuracy, 0.5)
         self.assertGreater(metrics.attack_advantage, 0)
         
     def test_tpr_at_fpr(self):
-        """测试TPR@FPR计算"""
         from src.evaluation import MembershipInferenceEvaluator
         
         evaluator = MembershipInferenceEvaluator(fpr_thresholds=[0.01, 0.1])
@@ -384,7 +340,6 @@ class TestEvaluation(unittest.TestCase):
         self.assertIn(0.1, tpr_dict)
         
     def test_baseline_comparator(self):
-        """测试基线对比器"""
         from src.evaluation import BaselineComparator
         
         comparator = BaselineComparator()
@@ -397,7 +352,6 @@ class TestEvaluation(unittest.TestCase):
         self.assertIn("Method_B", comparison)
         
     def test_statistical_tester(self):
-        """测试统计显著性"""
         from src.evaluation import StatisticalTester
         
         mean_auc, lower, upper = StatisticalTester.bootstrap_auc(
@@ -409,10 +363,8 @@ class TestEvaluation(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    """工具函数测试"""
     
     def test_set_seed(self):
-        """测试随机种子设置"""
         from src.utils import set_seed
         
         set_seed(42)
@@ -424,7 +376,6 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(torch.equal(a, b))
         
     def test_average_meter(self):
-        """测试平均值计算器"""
         from src.utils import AverageMeter
         
         meter = AverageMeter("test")
@@ -437,7 +388,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(meter.count, 3)
         
     def test_timer(self):
-        """测试计时器"""
         from src.utils import Timer
         import time
         
@@ -449,7 +399,6 @@ class TestUtils(unittest.TestCase):
 
 
 def run_tests(module: str = None):
-    """运行测试"""
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     
@@ -476,7 +425,7 @@ def run_tests(module: str = None):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="AMSM Framework Tests")
+    parser = argparse.ArgumentParser(description="Mosaic Framework Tests")
     parser.add_argument(
         "--module",
         type=str,
