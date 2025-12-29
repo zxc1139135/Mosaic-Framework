@@ -1,6 +1,6 @@
 # ==============================================================================
-# Mosaic Framework Dependencies
-# Mosaic Framework for LLM Membership Inference Attack
+# AMSM Framework Dependencies
+# Adaptive Multi-Shadow Model Framework for LLM Membership Inference Attack
 # ==============================================================================
 
 # Core Deep Learning
@@ -24,7 +24,7 @@ hdbscan>=0.8.33
 # NLP Tools
 nltk>=3.8.0
 spacy>=3.6.0
-gensim>=4.3.0 # For topic modeling
+gensim>=4.3.0  # For topic modeling
 
 # Visualization
 matplotlib>=3.7.0
