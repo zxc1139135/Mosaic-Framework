@@ -8,7 +8,7 @@ Mosaic implements a domain-specialized expert system for conducting membership i
 
 ### Key Features
 
-- Four-stage training pipeline: expert construction, domain training, ensemble integration, attack execution
+- Training pipeline: expert construction, domain training, ensemble integration, attack execution
 - Multi-expert system with configurable number of specialized models
 - Dynamic routing with top-k sparse activation
 - Multi-granularity evaluation support
@@ -116,10 +116,6 @@ attack_execution:
 - OPT (1.3B)
 - LLaMA-2 (7B)
 - Pythia (1.4B)
-
-## License
-
-MIT License
 
 ## Disclaimer
 
