@@ -1,9 +1,5 @@
 """
 Contrastive attack network for membership inference.
-  1. FeatureEncoder: 3-layer MLP -> l2-normalized embedding
-  2. SupConLoss: supervised contrastive loss
-  3. ClassificationHead: linear -> sigmoid membership prob
-  4. AttackLoss: L_attack = L_con + lambda * L_cls
 """
 
 import torch
@@ -13,8 +9,6 @@ from typing import Tuple
 
 
 class FeatureEncoder(nn.Module):
-    """3-layer MLP encoder: R^{1+5K} -> R^d (l2-normalized)."""
-
     def __init__(self, input_dim: int, hidden_dim: int = 256, embed_dim: int = 128):
         super().__init__()
         self.net = nn.Sequential(
@@ -30,8 +24,6 @@ class FeatureEncoder(nn.Module):
 
 
 class ClassificationHead(nn.Module):
-    """Linear head: sigmoid(u^T e + b) -> membership probability."""
-
     def __init__(self, embed_dim: int = 128):
         super().__init__()
         self.linear = nn.Linear(embed_dim, 1)
@@ -41,8 +33,7 @@ class ClassificationHead(nn.Module):
 
 
 class ContrastiveAttackNetwork(nn.Module):
-    """Complete attack network: encoder + classifier."""
-
+    """Complete attack model"""
     def __init__(self, input_dim, hidden_dim=256, embed_dim=128):
         super().__init__()
         self.encoder = FeatureEncoder(input_dim, hidden_dim, embed_dim)
@@ -64,11 +55,6 @@ class ContrastiveAttackNetwork(nn.Module):
 
 
 class SupConLoss(nn.Module):
-    """
-    Supervised Contrastive Loss (Eq. 8).
-    Pulls same-label embeddings together, pushes different-label apart.
-    """
-
     def __init__(self, temperature: float = 0.07):
         super().__init__()
         self.temperature = temperature
@@ -106,8 +92,6 @@ class SupConLoss(nn.Module):
 
 
 class AttackLoss(nn.Module):
-    """Joint loss: L_attack = L_con + lambda * L_cls (Eq. 10)."""
-
     def __init__(self, temperature=0.07, lambda_cls=0.5):
         super().__init__()
         self.supcon = SupConLoss(temperature)

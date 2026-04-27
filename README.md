@@ -1,8 +1,8 @@
-# Mosaic: Range-Specialized Membership Inference Attacks against Large Language Models
+# Not All Memories Are Equal: Unlocking the Potential of Heterogeneous Memorization in LLMs for Membership Inference
 
 ## Overview
 
-**Mosaic** is a reference-based framework for membership inference attacks (MIAs) against large language models (LLMs). Unlike existing reference-based methods that treat all training samples uniformly, Mosaic is motivated by the observation that LLMs exhibit *heterogeneous memorization* — different training samples are memorized to vastly different degrees. Uniform reference models fail to capture this variation and produce unreliable membership signals at the extremes of the memorization spectrum.
+**Mosaic** is a reference-based framework for membership inference attacks (MIAs) against large language models (LLMs). Unlike existing reference-based methods that treat all training samples uniformly, Mosaic is motivated by the observation that LLMs exhibit *heterogeneous memorization*, namely, different training samples are memorized to vastly different degrees. Uniform reference models fail to capture this variation and produce unreliable membership signals at the extremes of the memorization spectrum.
 
 Mosaic addresses this by:
 
@@ -132,12 +132,4 @@ python main.py \
 
 ## Baselines
 
-The following MIA methods are re-implemented in `baselines.py` for direct comparison:
-
-- **Zlib** — reference-free; uses the ratio of target model loss to zlib compression entropy
-- **Neighborhood** — compares target loss on the original text vs. perturbed neighbors
-- **Min-K%++** — normalizes min-k% token log-likelihoods with token-level statistics
-- **CAMIA** — composes multiple token signals via statistical hypothesis testing
-- **CON-RECALL** — contrastive score from asymmetric log-likelihood shifts induced by known members/non-members
-- **RMIA** — likelihood ratio test against reference models with pairwise dominance
-- **ICP-MIA** — in-context learning prompt-based membership inference
+The following MIA methods are re-implemented in `baselines.py` for direct comparison.

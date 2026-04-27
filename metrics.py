@@ -1,6 +1,5 @@
 """
 Evaluation metrics for membership inference attacks.
-AUC, TPR@FPR, Accuracy, per-domain stratified metrics, and score diagnostics.
 """
 
 import logging
@@ -37,7 +36,6 @@ def find_optimal_threshold(labels, scores):
 
 
 def threshold_for_target_fpr(labels, scores, target_fpr=0.1):
-    """Return the most permissive threshold whose FPR is <= target_fpr when possible."""
     fpr, _, thresholds = roc_curve(labels, scores)
     valid = np.where(fpr <= target_fpr)[0]
     if len(valid) == 0:

@@ -1,12 +1,5 @@
 """
 Reference feature extraction module.
-Per reference model, extracts 5 features:
-  Delta_k: absolute loss difference
-  Omega_k: loss ratio
-  Pi_k:    per-token log-prob discrepancy
-  H_bar_k: average Shannon entropy
-  rho_bar_k: average top-1 probability
-Final: f(x) = [f_T || f_1 || ... || f_K] in R^{1+5K}
 """
 
 import logging
@@ -136,7 +129,6 @@ def extract_all_features(
 ):
     """
     Extract f(x) = [f_T || f_1 || ... || f_K] for all samples.
-    Enforces a fixed paper-aligned dimensionality of 1+5K.
     """
     n = len(texts)
     if expected_num_domains is None:
@@ -177,8 +169,6 @@ def extract_all_features(
 def normalize_features(features, method="none"):
     """
     Normalize features.
-    Default is 'none' to stay closest to the paper feature definition unless
-    a normalization variant is explicitly requested.
     """
     if method == "none":
         return features

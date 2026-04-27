@@ -15,9 +15,6 @@ class ModelConfig:
         "mistralai/Mistral-7B-v0.1",
     ]
 
-    # Practical reduced-capacity defaults. For families without an official smaller
-    # release in the exact same series, we use the closest openly available
-    # tokenizer-compatible small variant and expose an override for strict experiments.
     REFERENCE_MODEL_MAP: Dict[str, str] = field(default_factory=lambda: {
         "gpt2-medium": "gpt2",
         "facebook/opt-1.3b": "facebook/opt-125m",

@@ -1,6 +1,5 @@
 """
 Data utilities for loading, preprocessing, and splitting datasets.
-Supports: WikiMIA, BookMIA, The Pile, AG News.
 """
 
 import logging
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 class TextDataset(Dataset):
     """Generic text dataset with membership labels and offset mappings."""
-
     def __init__(self, texts: List[str], labels: List[int], tokenizer, max_length: int = 512):
         self.texts = texts
         self.labels = labels
@@ -52,7 +50,6 @@ class TextDataset(Dataset):
 
 class FeatureDataset(Dataset):
     """Dataset of extracted feature vectors with labels."""
-
     def __init__(self, features: np.ndarray, labels: np.ndarray):
         self.features = torch.tensor(features, dtype=torch.float32)
         self.labels = torch.tensor(labels, dtype=torch.long)
@@ -63,8 +60,6 @@ class FeatureDataset(Dataset):
     def __getitem__(self, idx):
         return self.features[idx], self.labels[idx]
 
-
-# ---- Dataset Loaders ----
 
 def load_wikimia(cache_dir: str) -> Tuple[List[str], List[str]]:
     ds = load_dataset("wjfu99/WikiMIA-24-perturbed", split="WikiMIA_length64", cache_dir=cache_dir)
@@ -83,13 +78,6 @@ def load_bookmia(cache_dir: str) -> Tuple[List[str], List[str]]:
 
 
 def load_pile(cache_dir: str, max_samples: int = 20000) -> Tuple[List[str], List[str]]:
-    """
-    Load a subset of The Pile.
-
-    Practical note: Pile does not expose ground-truth membership labels in the same clean way
-    as WikiMIA/BookMIA. We therefore use two well-separated contiguous windows from the stream
-    as an approximate member/non-member split rather than a naive front-half/back-half split.
-    """
     try:
         ds = load_dataset("monology/pile-uncopyrighted", split="train", streaming=True, cache_dir=cache_dir)
         texts = []
@@ -141,9 +129,6 @@ def load_and_split_dataset(
 ) -> Dict:
     """
     Load dataset and create ref/eval splits.
-
-    Ref set is used to train reference models and the attack network.
-    Eval set is kept balanced whenever possible so evaluation is not distorted by label skew.
     """
     rng = np.random.RandomState(seed)
     loader = DATASET_LOADERS.get(dataset_name)
@@ -194,7 +179,6 @@ def load_and_split_dataset(
 
 
 def stratified_batch_sampler(labels: np.ndarray, batch_size: int, seed: int = 42):
-    """Yield batch indices with both classes present (required for SupCon)."""
     rng = np.random.RandomState(seed)
     labels = np.asarray(labels)
     pos_idx = np.where(labels == 1)[0].copy()

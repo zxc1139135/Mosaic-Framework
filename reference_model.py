@@ -1,8 +1,5 @@
 """
 Domain-specialized reference model training via asymmetric distillation.
-Two-stage sequential training:
-  Stage 1: Non-member alignment (imitation-loss dominant)
-  Stage 2: Member memorization (hard-loss dominant)
 """
 
 import logging
@@ -23,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 
 def compute_hard_loss(logits, labels, mask):
-    """L_hard = -1/|x| sum log P_R(w_i | w_{<i}) (Eq. 2)."""
     s_logits = logits[:, :-1, :].contiguous()
     s_labels = labels[:, 1:].contiguous()
     s_mask = mask[:, 1:].contiguous().float()
@@ -35,7 +31,6 @@ def compute_hard_loss(logits, labels, mask):
 
 
 def compute_imitation_loss(logits, labels, mask, aligned_target_probs):
-    """L_imit = -1/|x| sum alpha_i * log P_R(w_i | w_{<i}) (Eq. 3)."""
     s_logits = logits[:, :-1, :].contiguous()
     s_labels = labels[:, 1:].contiguous()
     s_mask = mask[:, 1:].contiguous().float()
@@ -48,19 +43,12 @@ def compute_imitation_loss(logits, labels, mask, aligned_target_probs):
 
 
 def compute_asymmetric_loss(logits, labels, mask, aligned_target_probs, epsilon, is_member):
-    """
-    Asymmetric loss (Eq. 4):
-      Members:     (1-eps)*L_hard + eps*L_imit
-      Non-members: eps*L_hard + (1-eps)*L_imit
-    """
     l_hard = compute_hard_loss(logits, labels, mask)
     l_imit = compute_imitation_loss(logits, labels, mask, aligned_target_probs)
     return (1 - epsilon) * l_hard + epsilon * l_imit if is_member else epsilon * l_hard + (1 - epsilon) * l_imit
 
 
 class _RemappedDataset(torch.utils.data.Dataset):
-    """Wrapper remapping local indices to original global indices."""
-
     def __init__(self, base_dataset, global_indices):
         self.base = base_dataset
         self.global_indices = global_indices
@@ -75,8 +63,6 @@ class _RemappedDataset(torch.utils.data.Dataset):
 
 
 class ReferenceModelTrainer:
-    """Trains domain-specialized reference models via asymmetric distillation."""
-
     def __init__(
         self,
         ref_model_name,
@@ -209,10 +195,6 @@ class ReferenceModelTrainer:
 
 
 def train_all_reference_models(ref_model_name, domains, texts, labels, target_metadata, config):
-    """
-    Train exactly K paper-defined domain-specialized reference models.
-    Any invalid domain is treated as an error instead of being silently skipped.
-    """
     target_metadata_dict = {i: p for i, p in enumerate(target_metadata)}
 
     probe_model = AutoModelForCausalLM.from_pretrained(

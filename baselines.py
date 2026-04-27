@@ -1,7 +1,5 @@
 """
 Baseline membership inference attack methods.
-Zlib, LiRA, Neighborhood, RMIA, Min-K%++, CAMIA, CON-RECALL, ICP-MIA.
-Each returns a scalar membership score per sample (higher = more likely member).
 """
 
 import zlib
@@ -39,7 +37,6 @@ def _get_token_logprobs(model, tokenizer, texts, max_length=512, batch_size=16, 
     return np.array(losses), all_lp
 
 
-# 1. Zlib: loss / zlib_entropy
 def zlib_score(texts, target_losses):
     scores = []
     for i, text in enumerate(texts):
@@ -48,7 +45,6 @@ def zlib_score(texts, target_losses):
     return np.array(scores)
 
 
-# 2. Min-K%++: z-score normalized Min-K% token log-probs
 def mink_pp_score(token_logprobs, k_percent=0.2):
     scores = []
     for lp_list in token_logprobs:
@@ -63,7 +59,6 @@ def mink_pp_score(token_logprobs, k_percent=0.2):
     return np.array(scores)
 
 
-# 3. Neighborhood Attack: loss(perturbed) - loss(original)
 def neighborhood_score(model, tokenizer, texts, target_losses,
                        n_perturbations=10, mask_ratio=0.15,
                        max_length=512, device="cuda"):
@@ -86,7 +81,6 @@ def neighborhood_score(model, tokenizer, texts, target_losses,
     return np.array(scores)
 
 
-# 4. LiRA: Gaussian likelihood ratio from shadow model losses
 def lira_score(target_losses, shadow_in_losses, shadow_out_losses):
     mu_in, sig_in = shadow_in_losses.mean(1), shadow_in_losses.std(1) + 1e-8
     mu_out, sig_out = shadow_out_losses.mean(1), shadow_out_losses.std(1) + 1e-8
@@ -95,14 +89,12 @@ def lira_score(target_losses, shadow_in_losses, shadow_out_losses):
     return lp_in - lp_out
 
 
-# 5. RMIA: pairwise dominance of target/ref likelihood ratio
 def rmia_score(target_losses, ref_losses, pop_target, pop_ref, gamma=1.0):
     query_ratio = np.exp(-target_losses) / (np.exp(-ref_losses) + 1e-10)
     pop_ratio = np.exp(-pop_target) / (np.exp(-pop_ref) + 1e-10)
     return np.array([np.mean(pop_ratio < gamma * qr) for qr in query_ratio])
 
 
-# 6. CAMIA: multiple complementary token-level signals
 def camia_score(token_logprobs, k_percent=0.2):
     scores = []
     for lp_list in token_logprobs:
@@ -118,7 +110,6 @@ def camia_score(token_logprobs, k_percent=0.2):
     return np.array(scores)
 
 
-# 7. CON-RECALL: contrastive score from member/nonmember prefix shifts
 def con_recall_score(model, tokenizer, texts, member_prefixes, nonmember_prefixes,
                      max_length=512, batch_size=8, device="cuda"):
     base_losses, _ = _get_token_logprobs(model, tokenizer, texts, max_length, batch_size, device)
@@ -136,7 +127,6 @@ def con_recall_score(model, tokenizer, texts, member_prefixes, nonmember_prefixe
     return nm_shift - m_shift
 
 
-# 8. ICP-MIA(-Ref): in-context prompting perplexity shift
 def icp_mia_score(model, tokenizer, texts, icl_examples,
                   max_length=512, batch_size=8, device="cuda", ref_model=None):
     base, _ = _get_token_logprobs(model, tokenizer, texts, max_length, batch_size, device)
@@ -158,7 +148,6 @@ BASELINE_METHODS = ["zlib", "mink_pp", "neighborhood", "lira", "rmia",
 
 def run_baseline(method, model, tokenizer, texts, target_losses, token_logprobs,
                  device="cuda", **kwargs):
-    """Dispatch to a specific baseline. Returns (N,) membership scores."""
     logger.info(f"Running baseline: {method}")
     if method == "zlib":
         return zlib_score(texts, target_losses)

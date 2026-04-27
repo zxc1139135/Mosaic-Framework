@@ -1,7 +1,5 @@
 """
-Training pipeline for the contrastive attack network.
-Uses stratified batching, supervised contrastive loss, BCE loss,
-and early stopping based on validation AUC.
+Training pipeline for the contrastive attack model.
 """
 
 import os
@@ -19,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class AttackNetworkTrainer:
-    """Trainer for the contrastive attack network."""
-
+    """Trainer for the contrastive attack model."""
     def __init__(
         self,
         input_dim,
@@ -50,7 +47,6 @@ class AttackNetworkTrainer:
         self.optimizer = Adam(self.network.parameters(), lr=lr)
 
     def _validate_features(self, features, name="features"):
-        """Validate feature matrix shape before forwarding through the network."""
         if features is None:
             raise ValueError(f"{name} is None")
         if not hasattr(features, "shape"):
@@ -69,12 +65,6 @@ class AttackNetworkTrainer:
 
     def train(self, train_features, train_labels,
               val_features=None, val_labels=None) -> Dict[str, list]:
-        """
-        Train the attack network on extracted feature vectors.
-
-        Returns:
-            history: dict with train loss and validation AUC history
-        """
         self._validate_features(train_features, "train_features")
         if val_features is not None:
             self._validate_features(val_features, "val_features")
@@ -213,7 +203,6 @@ class AttackNetworkTrainer:
         return (self.predict_scores(features) >= threshold).astype(int)
 
     def save(self, path):
-        """Save model, optimizer, and input dimension."""
         os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
         torch.save(
             {
@@ -226,7 +215,6 @@ class AttackNetworkTrainer:
         logger.info(f"Attack network saved to {path} (input_dim={self.input_dim})")
 
     def load(self, path):
-        """Load model state and validate input dimension if stored."""
         ckpt = torch.load(path, map_location=self.device)
 
         ckpt_input_dim = ckpt.get("input_dim", None)

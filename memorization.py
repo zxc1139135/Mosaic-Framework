@@ -1,11 +1,5 @@
 """
-Memorization score computation and paper-aligned domain partitioning.
-
-S(x) = -1 / |x| * sum(log P(w_i | w_<i)) for each sample.
-Lower S(x) indicates stronger memorization.
-
-Samples are partitioned globally by memorization score into K consecutive
-quantile domains, matching the paper description.
+Memorization score computation and domain partitioning.
 """
 
 import logging
@@ -46,12 +40,7 @@ def compute_memorization_scores(
 ) -> Tuple[np.ndarray, List[List[float]]]:
     """
     Compute average negative log-likelihood per sample.
-
     Lower score means stronger memorization.
-
-    Returns:
-        scores: shape (N,)
-        token_logprobs: per-token log-probabilities for each sample
     """
     model.eval()
     model.to(device)
@@ -177,16 +166,6 @@ def partition_into_domains(
     num_domains: int = 8,
     strict: bool = True,
 ) -> Dict[int, Dict]:
-    """
-    Partition all samples globally into K consecutive score-quantile domains.
-
-    This matches the paper description: all samples are sorted together by S(x),
-    then split into K nearly equal-sized consecutive subsets.
-
-    If strict=True, every domain must contain at least one member and one
-    non-member; otherwise a ValueError is raised rather than silently changing
-    the method or skipping domains.
-    """
     if len(scores) != len(labels):
         raise ValueError(
             f"scores and labels must have the same length, got {len(scores)} and {len(labels)}"

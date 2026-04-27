@@ -1,5 +1,3 @@
-"""Main entry point for the paper-aligned Mosaic framework."""
-
 import argparse
 import json
 import logging

@@ -1,6 +1,5 @@
 """
 End-to-end membership inference on unseen query samples.
-Combines target model querying, feature extraction, and attack network prediction.
 """
 
 import logging
@@ -15,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class MembershipInference:
     """End-to-end membership inference engine."""
-
     def __init__(
         self,
         target_model,
